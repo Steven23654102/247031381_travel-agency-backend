@@ -12,11 +12,26 @@ interface HotelInput {
   image: string;
 }
 
-//  取得所有飯店（公開）
+
+//  取得所有飯店（支援搜尋與篩選）
 router.get('/', async ctx => {
-  const hotels = await Hotel.find();
+  const { city, priceMin, priceMax, keyword } = ctx.query;
+
+  const query: any = {};
+  if (city) query.city = city;
+  if (priceMin || priceMax) {
+    query.price = {};
+    if (priceMin) query.price.$gte = Number(priceMin);
+    if (priceMax) query.price.$lte = Number(priceMax);
+  }
+  if (keyword) {
+    query.name = { $regex: keyword, $options: 'i' };
+  }
+
+  const hotels = await Hotel.find(query);
   ctx.body = hotels;
 });
+
 
 //  新增飯店（需登入）
 router.post('/', verifyToken, async ctx => {
