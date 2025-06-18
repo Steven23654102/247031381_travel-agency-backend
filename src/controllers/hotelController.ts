@@ -2,6 +2,8 @@ import Router from 'koa-router';
 import Hotel from '../models/Hotel';
 import { verifyToken } from '../middleware/authMiddleware';
 import axios from 'axios';
+import crypto from 'crypto';
+import dayjs from 'dayjs';
 
 const router = new Router({ prefix: '/api/hotels' });
 
@@ -70,23 +72,51 @@ router.delete('/:id', verifyToken, async ctx => {
 // 新增整合 Hotelbeds API 的 endpoint
 router.get('/hotelbeds', async ctx => {
   try {
-    const response = await axios.get('https://api.test.hotelbeds.com/hotel-api/1.0/hotels', {
-      headers: {
-        'Api-key': process.env.HOTELBEDS_API_KEY!,
-        'Accept': 'application/json'
-        // ⛔ 若有 secret key，還需包含 Authorization or X-Signature，否則會 401
-      },
-      params: {
-        destination: ctx.query.city || 'PAR',
-      },
-    });
+    const { signature, timestamp } = buildSignature();
+
+    const response = await axios.get(
+      'https://api.test.hotelbeds.com/hotel-api/1.0/hotels',
+      {
+        headers: {
+          'Api-key'     : process.env.HOTELBEDS_API_KEY!,
+          'X-Signature' : signature,
+          'Accept'      : 'application/json',
+          'Accept-Encoding': 'gzip'         // 官方建議
+        },
+        params: {
+          destination: ctx.query.city || 'PAR',
+          checkin    : dayjs().add(30, 'day').format('YYYY-MM-DD'),
+          checkout   : dayjs().add(32, 'day').format('YYYY-MM-DD'),
+          occupancies: '1'                 // ⬅︎ Hotelbeds 要求最基本參數
+        }
+      }
+    );
 
     ctx.body = response.data;
   } catch (err: any) {
-    ctx.status = 500;
-    ctx.body = { error: 'Failed to fetch Hotelbeds data', details: err.message };
+    ctx.status = err.response?.status || 500;
+    ctx.body   = {
+      error  : 'Failed to fetch Hotelbeds data',
+      details: err.response?.data || err.message
+    };
   }
 });
 
+
+export function generateHotelbedsSignature(apiKey: string, secret: string): string {
+  const timestamp = Math.floor(Date.now() / 1000); // 現在時間（秒）
+  const raw = apiKey + secret + timestamp;
+  const hash = crypto.createHash('sha256').update(raw).digest('hex');
+  return hash;
+}
+
+function buildSignature() {
+  const apiKey = process.env.HOTELBEDS_API_KEY!;
+  const secret = process.env.HOTELBEDS_SECRET!;
+  const timestamp = Math.floor(Date.now() / 1000);
+  const raw = apiKey + secret + timestamp;
+  const signature = crypto.createHash('sha256').update(raw).digest('hex');
+  return { signature, timestamp };
+}
 
 export default router;
