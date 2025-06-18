@@ -1,6 +1,7 @@
 import Router from 'koa-router';
 import Hotel from '../models/Hotel';
 import { verifyToken } from '../middleware/authMiddleware';
+import axios from 'axios';
 
 const router = new Router({ prefix: '/api/hotels' });
 
@@ -65,5 +66,27 @@ router.delete('/:id', verifyToken, async ctx => {
   }
   ctx.body = { message: 'Hotel deleted' };
 });
+
+// 新增整合 Hotelbeds API 的 endpoint
+router.get('/hotelbeds', async ctx => {
+  try {
+    const response = await axios.get('https://api.test.hotelbeds.com/hotel-api/1.0/hotels', {
+      headers: {
+        'Api-key': process.env.HOTELBEDS_API_KEY!,
+        'Accept': 'application/json'
+        // ⛔ 若有 secret key，還需包含 Authorization or X-Signature，否則會 401
+      },
+      params: {
+        destination: ctx.query.city || 'PAR',
+      },
+    });
+
+    ctx.body = response.data;
+  } catch (err: any) {
+    ctx.status = 500;
+    ctx.body = { error: 'Failed to fetch Hotelbeds data', details: err.message };
+  }
+});
+
 
 export default router;
