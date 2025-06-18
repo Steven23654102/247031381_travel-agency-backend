@@ -79,7 +79,7 @@ router.get('/hotelbeds', async ctx => {
       {
         headers: {
           'Api-key'     : process.env.HOTELBEDS_API_KEY!,
-          'X-Signature' : signature, // 🔐 加上這行
+          'X-Signature' : signature, //  加上這行
           'Accept'      : 'application/json',
         },
         params: {

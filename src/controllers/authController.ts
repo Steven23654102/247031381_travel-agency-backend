@@ -1,3 +1,4 @@
+// src/controllers/authController.ts
 import Router from 'koa-router';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
@@ -14,6 +15,7 @@ router.post('/register', async (ctx) => {
 
   const { email, password, signupCode } = body;
 
+  // 加入 signup code 驗證
   if (signupCode !== 'VT2025') {
     ctx.status = 403;
     ctx.body = { error: 'Invalid signup code' };
