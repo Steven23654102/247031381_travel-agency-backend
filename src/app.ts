@@ -1,11 +1,17 @@
 import Koa from 'koa';
+import cors from '@koa/cors';
 import bodyParser from 'koa-bodyparser';
 
 import connectDB from './config/db';
 import authRoutes from './controllers/authController';
-import hotelRoutes from './controllers/hotelController'; // 放在 import 區域
+import hotelRoutes from './controllers/hotelController';
 
-const app = new Koa(); 
+const app = new Koa();
+
+// 加入 CORS 支援
+app.use(cors());
+
+// 使用中介層
 app.use(bodyParser());
 
 connectDB();

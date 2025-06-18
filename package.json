@@ -3,6 +3,7 @@
         "dev": "ts-node-dev --respawn --transpile-only src/app.ts"
     },
     "dependencies": {
+        "@koa/cors": "^5.0.0",
         "axios": "^1.10.0",
         "bcrypt": "^6.0.0",
         "dayjs": "^1.11.13",
