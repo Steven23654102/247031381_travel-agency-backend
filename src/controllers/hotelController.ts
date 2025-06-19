@@ -5,6 +5,7 @@ import { verifyToken } from '../middleware/authMiddleware';
 import axios from 'axios';
 import crypto from 'crypto';
 import dayjs from 'dayjs';
+import Booking from '../models/booking.model';
 
 const router = new Router({ prefix: '/api/hotels' });
 
@@ -15,6 +16,15 @@ interface HotelInput {
   minRate: number;
   phone: string;
   description: string;
+}
+
+interface BookingInput {
+  hotelId: string;
+  guestEmail: string;
+  checkInDate: string;
+  stayDays: number;
+  note?: string;
+  rating?: number;
 }
 
 
@@ -151,6 +161,60 @@ router.get('/hotelbeds/raw', async ctx => {
 
   ctx.body = response.data;
 });
+
+
+// 查詢單一飯店
+router.get('/:id', async ctx => {
+  try {
+    const hotel = await Hotel.findById(ctx.params.id);
+    if (!hotel) {
+      ctx.status = 404;
+      ctx.body = { error: 'Hotel not found' };
+      return;
+    }
+    ctx.body = hotel;
+  } catch (err) {
+    ctx.status = 500;
+    ctx.body = { error: 'Server error', detail: err };
+  }
+});
+
+router.post('/bookings', async ctx => {
+  try {
+    const total = await Booking.countDocuments();
+
+    interface BookingInput {
+      hotelId: string;
+      guestEmail: string;
+      checkInDate: string;
+      stayDays: number;
+      note?: string;
+      rating?: number;
+    }
+
+    const {
+      hotelId, guestEmail, checkInDate, stayDays, note, rating
+    } = ctx.request.body as BookingInput;
+
+    const newBooking = new Booking({
+      hotelId,
+      guestEmail,
+      checkInDate,
+      stayDays,
+      note,
+      rating,
+      sequence: total + 1
+    });
+
+    await newBooking.save();
+    ctx.body = { message: '預約成功', booking: newBooking };
+  } catch (err) {
+    ctx.status = 500;
+    ctx.body = { error: '無法建立預約', detail: err };
+  }
+});
+
+
 
 function buildSignature() {
   const apiKey = process.env.HOTELBEDS_API_KEY!;
