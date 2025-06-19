@@ -107,6 +107,24 @@ router.get('/favorites', verifyToken, async ctx => {
   ctx.body = favorites;
 });
 
+router.delete('/favorites/:id', verifyToken, async ctx => {
+  try {
+    const deleted = await Favorite.findByIdAndDelete(ctx.params.id);
+    if (!deleted) {
+      ctx.status = 404;
+      ctx.body = { error: '找不到收藏紀錄' };
+      return;
+    }
+    ctx.body = { message: '已取消收藏' };
+  } catch (err) {
+    ctx.status = 500;
+    ctx.body = { error: '取消收藏失敗', detail: err };
+  }
+});
+
+
+
+
 //  更新飯店
 router.put('/:id', verifyToken, async ctx => {
   const updated = await Hotel.findByIdAndUpdate(
