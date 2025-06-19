@@ -10,7 +10,6 @@ import bodyParser from 'koa-bodyparser';
 import connectDB from './config/db';
 import authRoutes from './controllers/authController';
 import hotelRoutes from './controllers/hotelController';
-import favoriteRoutes from './routes/favorite.routes';
 
 
 const app = new Koa();
@@ -30,7 +29,6 @@ connectDB();
 
 app.use(authRoutes.routes()).use(authRoutes.allowedMethods());
 app.use(hotelRoutes.routes()); // 放在 app.use(...) 區域
-app.use(favoriteRoutes.routes()).use(favoriteRoutes.allowedMethods());
 
 app.listen(3000, () => {
   console.log('Server running on http://localhost:3000');

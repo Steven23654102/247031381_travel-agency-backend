@@ -6,6 +6,7 @@ import axios from 'axios';
 import crypto from 'crypto';
 import dayjs from 'dayjs';
 import Booking from '../models/booking.model';
+import Favorite from '../models/favorite.model';
 
 const router = new Router({ prefix: '/api/hotels' });
 
@@ -27,6 +28,9 @@ interface BookingInput {
   rating?: number;
 }
 
+interface FavoriteInput {
+  hotelId: string;
+}
 
 //  查詢飯店（支援篩選）
 router.get('/', async ctx => {
@@ -74,6 +78,34 @@ router.post('/', verifyToken, async ctx => {
   }
 });
 
+
+// 收藏飯店
+router.post('/favorites', verifyToken, async ctx => {
+  const { hotelId } = ctx.request.body as FavoriteInput;
+  const userEmail = ctx.state.user.email;
+
+  try {
+    const exists = await Favorite.findOne({ userEmail, hotelId });
+    if (exists) {
+      ctx.body = { message: '已收藏過此飯店' };
+      return;
+    }
+
+    const fav = new Favorite({ userEmail, hotelId });
+    await fav.save();
+    ctx.body = { message: '收藏成功', favorite: fav };
+  } catch (err) {
+    ctx.status = 500;
+    ctx.body = { error: '收藏失敗', detail: err };
+  }
+});
+
+// 查看我的收藏飯店
+router.get('/favorites', verifyToken, async ctx => {
+  const userEmail = ctx.state.user.email;
+  const favorites = await Favorite.find({ userEmail }).populate('hotelId');
+  ctx.body = favorites;
+});
 
 //  更新飯店
 router.put('/:id', verifyToken, async ctx => {
