@@ -68,7 +68,7 @@ router.post('/login', async (ctx) => {
   /*── 3) 產生 JWT ──────────────────────────────*/
   // 必須先在 backend/.env 內加入 JWT_SECRET=value
   const token = jwt.sign(
-    { id: user._id, role: user.role },
+    { id: user._id, role: user.role, email: user.email },  //  加入 email
     process.env.JWT_SECRET as string,
     { expiresIn: '1h' }
   );

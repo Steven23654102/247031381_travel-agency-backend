@@ -162,6 +162,35 @@ router.get('/hotelbeds/raw', async ctx => {
   ctx.body = response.data;
 });
 
+// 取得登入者的預約記錄（需登入）
+router.get('/bookings', verifyToken, async ctx => {
+  try {
+    const userEmail = ctx.state.user.email; // 從 JWT 拿登入者 email
+    const bookings = await Booking.find({ guestEmail: userEmail }).populate('hotelId');
+    ctx.body = bookings;
+  } catch (err) {
+    ctx.status = 500;
+    ctx.body = { error: '無法取得預約資料', detail: err };
+  }
+});
+
+// 刪除指定預約
+router.delete('/bookings/:id', async ctx => {
+  try {
+    const deleted = await Booking.findByIdAndDelete(ctx.params.id);
+    if (!deleted) {
+      ctx.status = 404;
+      ctx.body = { error: '找不到該筆預約' };
+      return;
+    }
+    ctx.body = { message: '刪除成功' };
+  } catch (err) {
+    ctx.status = 500;
+    ctx.body = { error: '刪除失敗', detail: err };
+  }
+});
+
+
 
 // 查詢單一飯店
 router.get('/:id', async ctx => {
@@ -213,6 +242,8 @@ router.post('/bookings', async ctx => {
     ctx.body = { error: '無法建立預約', detail: err };
   }
 });
+
+
 
 
 
