@@ -1,10 +1,11 @@
 import mongoose from 'mongoose';
 
 const hotelSchema = new mongoose.Schema({
-  name: String,
-  city: String,
-  price: Number,
-  image: String,
+  name: { type: String, required: true },
+  destination: { type: String, required: true },
+  minRate: { type: Number, required: true },
+  phone: { type: String, required: true },
+  description: { type: String, required: true }
 });
 
 const Hotel = mongoose.model('Hotel', hotelSchema);
