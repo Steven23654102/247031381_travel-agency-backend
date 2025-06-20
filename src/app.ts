@@ -43,7 +43,8 @@ connectDB();
 app.use(authRoutes.routes()).use(authRoutes.allowedMethods());
 app.use(hotelRoutes.routes()); // 放在 app.use(...) 區域
 
-app.use(adminAuthRoutes.routes());
+app.use(adminAuthRoutes.routes()).use(adminAuthRoutes.allowedMethods());
+
 
 // 路由（每組掛一次，並加 allowedMethods）
 app

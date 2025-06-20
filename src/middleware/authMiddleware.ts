@@ -17,16 +17,25 @@ export async function verifyToken(ctx: Context, next: Next) {
   const token = authHeader.split(' ')[1];
 
   try {
-  const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
-    id: string;
-    role: string;
-    email: string;
-  };
-  ctx.state.user = decoded; //  確保能從 ctx.state.user.email 取得 email
-  await next();
-} catch (err) {
-  ctx.status = 403;
-  ctx.body = { error: 'Token verification failed' };
-}
+    let decoded;
 
+    // 嘗試用 user 的密鑰驗證
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET!);
+    } catch {
+      // 若失敗，再嘗試用 admin 的密鑰
+      decoded = jwt.verify(token, process.env.ADMIN_JWT_SECRET!);
+    }
+
+    ctx.state.user = decoded as {
+      id: string;
+      role: string;
+      email: string;
+    };
+
+    await next();
+  } catch (err) {
+    ctx.status = 403;
+    ctx.body = { error: 'Token verification failed' };
+  }
 }
