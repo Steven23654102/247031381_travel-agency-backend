@@ -1,7 +1,7 @@
 //app.ts
 import dotenv from 'dotenv';
 dotenv.config();
-console.log('✅ Loaded RAPID_KEY:', process.env.RAPID_KEY); // ⬅️ 測試完可以刪除
+console.log(' Loaded RAPID_KEY:', process.env.RAPID_KEY);
 
 
 import Koa from 'koa';
@@ -15,7 +15,7 @@ import authRoutes from './controllers/authController';
 import hotelRoutes from './controllers/hotelController';
 import flightRoutes from './controllers/flightController';
 
-
+import adminAuthRoutes from './controllers/adminAuth.routes';
 
 const app = new Koa();
 
@@ -29,9 +29,9 @@ app.use(async (ctx, next) => {
 app.use(cors({
   origin: 'http://localhost:3001',
   credentials: true,
+  allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowHeaders: ['Authorization', 'Content-Type']
 }));
-
 
 
 
@@ -43,6 +43,7 @@ connectDB();
 app.use(authRoutes.routes()).use(authRoutes.allowedMethods());
 app.use(hotelRoutes.routes()); // 放在 app.use(...) 區域
 
+app.use(adminAuthRoutes.routes());
 
 // 路由（每組掛一次，並加 allowedMethods）
 app
