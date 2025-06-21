@@ -17,6 +17,10 @@ import flightRoutes from './controllers/flightController';
 
 import adminAuthRoutes from './controllers/adminAuth.routes';
 
+import passport from './auth/passport';
+import googleAuthRoutes from './routes/googleAuth.routes';
+
+
 const app = new Koa();
 
 //  新增一段中介層，顯示 API 請求紀錄
@@ -44,6 +48,9 @@ app.use(authRoutes.routes()).use(authRoutes.allowedMethods());
 app.use(hotelRoutes.routes()); // 放在 app.use(...) 區域
 
 app.use(adminAuthRoutes.routes()).use(adminAuthRoutes.allowedMethods());
+
+app.use(passport.initialize());
+app.use(googleAuthRoutes.routes()).use(googleAuthRoutes.allowedMethods());
 
 
 // 路由（每組掛一次，並加 allowedMethods）
