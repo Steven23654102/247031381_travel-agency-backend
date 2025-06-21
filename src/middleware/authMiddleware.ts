@@ -39,3 +39,24 @@ export async function verifyToken(ctx: Context, next: Next) {
     ctx.body = { error: 'Token verification failed' };
   }
 }
+
+
+export const authMiddleware = async (ctx: Context, next: Next) => {
+  const authHeader = ctx.headers['authorization'];
+  const token = authHeader?.split(' ')[1];
+
+  if (!token) {
+    ctx.status = 401;
+    ctx.body = { error: '未提供 token' };
+    return;
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!);
+    ctx.state.user = decoded;
+    await next();
+  } catch (err) {
+    ctx.status = 403;
+    ctx.body = { error: 'token 驗證失敗' };
+  }
+};

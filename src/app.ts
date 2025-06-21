@@ -20,6 +20,10 @@ import adminAuthRoutes from './controllers/adminAuth.routes';
 import passport from './auth/passport';
 import googleAuthRoutes from './routes/googleAuth.routes';
 
+import bookingRoutes from './routes/booking.routes';
+
+
+
 
 const app = new Koa();
 
@@ -39,6 +43,9 @@ app.use(cors({
 
 
 
+
+
+
 // 使用中介層
 app.use(bodyParser());
 
@@ -51,6 +58,9 @@ app.use(adminAuthRoutes.routes()).use(adminAuthRoutes.allowedMethods());
 
 app.use(passport.initialize());
 app.use(googleAuthRoutes.routes()).use(googleAuthRoutes.allowedMethods());
+
+app.use(bookingRoutes.routes());
+
 
 
 // 路由（每組掛一次，並加 allowedMethods）

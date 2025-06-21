@@ -4,7 +4,6 @@ import bcrypt     from 'bcrypt';
 import jwt        from 'jsonwebtoken';
 import Admin      from '../models/Admin';
 import { verifyToken } from '../middleware/authMiddleware';
-import Booking from '../models/booking.model';
 
 
 const router = new Router({ prefix: '/api/admin' });
@@ -80,14 +79,5 @@ router.get('/profile', verifyToken, async ctx => {
   ctx.body = { admin };
 });
 
-router.get('/bookings', verifyToken, async ctx => {
-  if (ctx.state.user.role !== 'admin') {
-    ctx.throw(403, '沒有權限');
-    return;
-  }
-
-  const bookings = await Booking.find().populate('user', 'email');
-  ctx.body = { bookings };
-});
 
 export default router;
